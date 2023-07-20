@@ -6,11 +6,6 @@ const catchAsyncError = require("../middleware/catchAsyncError");
 //  //! Regex for Email & Password...
 const validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
-//  //! Home Route...
-exports.homeRoute = catchAsyncError(async(req,res,next)=>{
-    return res.status(200).json({success:true,message:"API works..."});
-});
-
 //  //! Signup User...
 exports.signupRoute = catchAsyncError(async(req,res,next)=>{
 
@@ -86,10 +81,89 @@ exports.userRoute = catchAsyncError(async(req,res,next)=>{
 });
 
 //  //! Get All User...
+exports.getAllUsersRoute = catchAsyncError(async(req,res,next)=>{
+    const {token} = req.headers;
+    try {
+        if(!token)
+            return res.status(401).json({success:false,message:"JWT token is required"});
 
+        const decToken = await jwt.verify(token,'this_is_secret_key');
+        const user = await UserModel.findById({_id:decToken.id});
+        if(!user)
+            return res.status(401).json({success:false,message:"Please login to access"});
+        const allUsers = await UserModel.find({}).sort({_id:-1});
+        const totalUsers = await UserModel.countDocuments();
+        return res.status(200).json({success:true,totalUsers,allUsers});
+    } catch (error) {
+        return res.status(401).json({success:false,message:error.message});
+    }
+});
 
 //  //! Update a User...
+exports.updateUserRoute = catchAsyncError(async(req,res,next)=>{
+    const {token} = req.headers;
+    const userId = req.params.id;
+    const {email,name,phone} = req.body;
 
+    try {
+        
+        if(!userId)
+            return res.status(401).json({success:false,message:"User Id is required"});
+        if(!email && !name && !phone)
+            return res.status(401).json({success:false,message:"All fields are required"});
+        if(!String(email).match(validRegex))
+            return res.status(400).json({success:false,message:'Invalid Email'});
+        if(String(name).length<3)
+            return res.status(401).json({success:false,message:"Name should be 3 char long"});
+        if(String(phone).length<10 && !isNaN(phone))
+            return res.status(401).json({success:false,message:"Phone number must be 10 digit"});
+
+        if(!token)
+            return res.status(401).json({success:false,message:"JWT token is required"});
+
+        const decToken = await jwt.verify(token,'this_is_secret_key');
+        const user = await UserModel.findById({_id:decToken.id});
+        if(!user)
+            return res.status(401).json({success:false,message:"Please login to access"});
+
+        const isUser = await UserModel.findById({_id:userId});
+        if(!isUser)
+            return res.status(401).json({success:false,message:`Invalid Id : ${userId}, User not found`});
+       
+        await UserModel.findByIdAndUpdate({_id:isUser._id},{
+            name,
+            email:String(email).toLowerCase(),
+            phone
+        });
+
+        const allUsers = await UserModel.find({}).sort({_id:-1});
+        const totalUsers = await UserModel.countDocuments();
+        return res.status(200).json({success:true,totalUsers,allUsers,message:`${email} updated successfully`});
+    } catch (error) {
+        return res.status(401).json({success:false,message:error.message});
+    }
+});
 
 //  //! Delete a User...
+exports.deleteUserRoute = catchAsyncError(async(req,res,next)=>{
+    const {token} = req.headers;
+    const userId = req.params.id;
+    try {
+        if(!token)
+            return res.status(401).json({success:false,message:"JWT token is required"});
 
+        const decToken = await jwt.verify(token,'this_is_secret_key');
+        const user = await UserModel.findById({_id:decToken.id});
+        if(!user)
+            return res.status(401).json({success:false,message:"Please login to access"});
+        const deleteUser = await UserModel.findByIdAndDelete({_id:userId});
+        if(!deleteUser)
+            return res.status(200).json({success:false,message:`Invalid Id : ${userId}`});
+        const allUsers = await UserModel.find({}).sort({_id:-1});
+        const totalUsers = await UserModel.countDocuments();
+        return res.status(200).json({success:true,totalUsers,allUsers,message:`${deleteUser.email} deleted`});
+
+    } catch (error) {
+        return res.status(401).json({success:false,message:error.message});
+    }
+});
