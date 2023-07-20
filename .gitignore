@@ -2,3 +2,7 @@
 
 /backend/config.env
 
+# dependencies
+/frontend/node_modules
+# production
+/frontend/build
