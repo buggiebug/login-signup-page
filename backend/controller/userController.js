@@ -14,9 +14,6 @@ exports.signupRoute = catchAsyncError(async(req,res,next)=>{
     if(String(name).length<3)
         return res.status(400).json({success:false,message:'Name should be 3 char long'});
 
-    if(!String(email).match(validRegex))
-        return res.status(400).json({success:false,message:'Invalid Email'});
-        
     if(!password && !confirmPassword)
         return res.status(400).json({success:false,message:'Password is required'});
 
@@ -25,6 +22,10 @@ exports.signupRoute = catchAsyncError(async(req,res,next)=>{
 
     if(String(password).length<8 || !password)
         return res.status(400).json({success:false,message:'Password must be 8 char long'});
+    
+    if(!String(email).match(validRegex))
+        return res.status(400).json({success:false,message:'Invalid Email'});
+        
 
     const isUser = await UserModel.findOne({email:String(email).toLowerCase()});
     if(isUser)
