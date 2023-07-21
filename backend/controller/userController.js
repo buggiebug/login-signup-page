@@ -92,7 +92,7 @@ exports.getAllUsersRoute = catchAsyncError(async(req,res,next)=>{
         const user = await UserModel.findById({_id:decToken.id});
         if(!user)
             return res.status(401).json({success:false,message:"Please login to access"});
-        const allUsers = await UserModel.find({}).sort({_id:-1});
+        const allUsers = await UserModel.find({});
         const totalUsers = await UserModel.countDocuments();
         return res.status(200).json({success:true,totalUsers,allUsers});
     } catch (error) {
@@ -104,17 +104,19 @@ exports.getAllUsersRoute = catchAsyncError(async(req,res,next)=>{
 exports.updateUserRoute = catchAsyncError(async(req,res,next)=>{
     const {token} = req.headers;
     const userId = req.params.id;
-    const {email,name,phone} = req.body;
+    const {name,phone} = req.body;
 
     try {
         
         if(!userId)
             return res.status(401).json({success:false,message:"User Id is required"});
-        if(!email && !name && !phone)
+        if(!name && !phone)
             return res.status(401).json({success:false,message:"All fields are required"});
-        if(!String(email).match(validRegex))
-            return res.status(400).json({success:false,message:'Invalid Email'});
-        if(String(name).length<3)
+        else if(String(phone).trim()==="")
+            return res.status(401).json({success:false,message:"Fileds can't be blank"});
+        else if(String(name).trim()==="")
+            return res.status(401).json({success:false,message:"Fileds can't be blank"});
+        else if(String(name).length<3)
             return res.status(401).json({success:false,message:"Name should be 3 char long"});
         if(String(phone).length<10 && !isNaN(phone))
             return res.status(401).json({success:false,message:"Phone number must be 10 digit"});
@@ -133,13 +135,12 @@ exports.updateUserRoute = catchAsyncError(async(req,res,next)=>{
        
         await UserModel.findByIdAndUpdate({_id:isUser._id},{
             name,
-            email:String(email).toLowerCase(),
             phone
         });
 
-        const allUsers = await UserModel.find({}).sort({_id:-1});
+        const allUsers = await UserModel.find({});
         const totalUsers = await UserModel.countDocuments();
-        return res.status(200).json({success:true,totalUsers,allUsers,message:`${email} updated successfully`});
+        return res.status(200).json({success:true,totalUsers,allUsers,message:`${isUser.email} updated successfully`});
     } catch (error) {
         return res.status(401).json({success:false,message:error.message});
     }
@@ -157,10 +158,12 @@ exports.deleteUserRoute = catchAsyncError(async(req,res,next)=>{
         const user = await UserModel.findById({_id:decToken.id});
         if(!user)
             return res.status(401).json({success:false,message:"Please login to access"});
+        if(String(user._id)===String(userId))
+            return res.status(401).json({success:false,message:"You can't delete your own account"});
         const deleteUser = await UserModel.findByIdAndDelete({_id:userId});
         if(!deleteUser)
             return res.status(200).json({success:false,message:`Invalid Id : ${userId}`});
-        const allUsers = await UserModel.find({}).sort({_id:-1});
+        const allUsers = await UserModel.find({});
         const totalUsers = await UserModel.countDocuments();
         return res.status(200).json({success:true,totalUsers,allUsers,message:`${deleteUser.email} deleted`});
 

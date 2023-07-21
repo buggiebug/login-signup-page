@@ -11,7 +11,7 @@ function Login() {
     if(localStorage.getItem("token"))
       navigate("/home");
     // eslint-disable-next-line
-  },[]);
+  },[localStorage.getItem("token")]);
 
   const {loginApi} = useContext(createUserContext);
 
@@ -20,7 +20,7 @@ function Login() {
     setloginState({...loginState,[e.target.name]:e.target.value});
   }
 
-  const submitLogin = (e)=>{
+  const submitLogin = async (e)=>{
     e.preventDefault();
 
     if(!loginState.email || !loginState.password)
@@ -28,7 +28,7 @@ function Login() {
       toast.info("All fields are");
       return;
     }
-    const res = loginApi(loginState);
+    const res = await loginApi(loginState);
     if(res)
       navigate("/home");
   }
@@ -44,7 +44,7 @@ function Login() {
                 <div className="">
                     <div className="mb-6">
                       <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">Email address</label>
-                      <input onChange={onChangeHandler} type="email" name='email' id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " placeholder="john.doe@company.com"/>
+                      <input onChange={onChangeHandler} type="email" name='email' id="email" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " placeholder="mishrashubh38@gmail.com"/>
                     </div> 
                     <div className="mb-6">
                         <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">Password</label>

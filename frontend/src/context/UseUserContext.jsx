@@ -54,13 +54,57 @@ function UseUserContext(props) {
       },
     });
     const res = await fetchData.json();
-    console.log(res);
     if (res.success === true) {
       setTotalUsersState(res.totalUsers);
       setAllUsersState(res.allUsers);
       return true;
     } else {
       toast.warn(res.message);
+      return true;
+    }
+  };
+
+  //  //! Delete a User...
+  const deleteUserApi = async(id)=>{
+    const fetchData = await fetch(`${baseUrl}/delete_user/${id}`,{
+      method:"DELETE",
+      headers:{
+        "Content-Type":"application/json",
+        token: localStorage.getItem("token"),
+      }
+    });
+    const res = await fetchData.json();
+    if(res.success===true)
+    {
+      toast.info(res.message);
+      setTotalUsersState(res.totalUsers);
+      setAllUsersState(res.allUsers);
+      return true;
+    }else{
+      toast.warn(res.message);
+      return false;
+    }
+  }
+
+  //  //! Update User...
+  const updateUserApi = async (updateUserData,id) => {
+    const fetchData = await fetch(`${baseUrl}/update_user/${id}`, {
+      method: "PUT",
+      headers: { 
+        "Content-Type": "application/json",
+        token: localStorage.getItem("token"),
+      },
+      body: JSON.stringify(updateUserData),
+    });
+    const res = await fetchData.json();
+    if (res.success === true) {
+      toast.info(res.message);
+      setTotalUsersState(res.totalUsers);
+      setAllUsersState(res.allUsers);
+      return true;
+    } else {
+      toast.warn(res.message);
+      return false;
     }
   };
 
@@ -72,6 +116,8 @@ function UseUserContext(props) {
         getAllUsersApi,
         totalUsersState,
         allUsersState,
+        deleteUserApi,
+        updateUserApi
       }}
     >
       {props.children}
