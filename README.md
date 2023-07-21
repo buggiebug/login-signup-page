@@ -1,4 +1,4 @@
-# Login/Signup API using MERN Stack
+# Login/Signup using MERN Stack
 
 # `Backend Setup ✅`
 
