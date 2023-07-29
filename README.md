@@ -1,5 +1,15 @@
 # Login/Signup using MERN Stack
 
+
+####  Login Preview
+![i-login](https://github.com/buggiebug/login-signup-page/assets/83863680/80dd28c6-08be-4651-b450-4e2742e97f3a)
+
+
+####  Signup Preview
+![i-signup](https://github.com/buggiebug/login-signup-page/assets/83863680/58b75589-247c-4858-98ea-d451c5231fae)
+
+
+
 # `Backend Setup ✅`
 
 ##### Step-1
